@@ -1,0 +1,29 @@
+2024-08-03 14:50:28,207 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Current SDK version is 0.16.4
+2024-08-03 14:50:28,208 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Configure stats pid to 3609147
+2024-08-03 14:50:28,208 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Loading settings from /home/haoyum3/.config/wandb/settings
+2024-08-03 14:50:28,209 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Loading settings from /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd2/wandb/settings
+2024-08-03 14:50:28,209 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-08-03 14:50:28,209 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-08-03 14:50:28,210 INFO    MainThread:3609147 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'code/text_to_image_sd2/train_pcm_lora_adv_decom.py', 'program_abspath': '/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd2/train_pcm_lora_adv_decom.py', 'program': 'train_pcm_lora_adv_decom.py'}
+2024-08-03 14:50:28,211 INFO    MainThread:3609147 [wandb_init.py:_log_setup():526] Logging user logs to /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd2/wandb/run-20240803_145028-mbt26kmd/logs/debug.log
+2024-08-03 14:50:28,212 INFO    MainThread:3609147 [wandb_init.py:_log_setup():527] Logging internal logs to /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd2/wandb/run-20240803_145028-mbt26kmd/logs/debug-internal.log
+2024-08-03 14:50:28,213 INFO    MainThread:3609147 [wandb_init.py:init():566] calling init triggers
+2024-08-03 14:50:28,213 INFO    MainThread:3609147 [wandb_init.py:init():573] wandb.init called with sweep_config: {}
+config: {}
+2024-08-03 14:50:28,213 INFO    MainThread:3609147 [wandb_init.py:init():616] starting backend
+2024-08-03 14:50:28,215 INFO    MainThread:3609147 [wandb_init.py:init():620] setting up manager
+2024-08-03 14:50:28,223 INFO    MainThread:3609147 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-08-03 14:50:28,232 INFO    MainThread:3609147 [wandb_init.py:init():628] backend started and connected
+2024-08-03 14:50:28,254 INFO    MainThread:3609147 [wandb_init.py:init():720] updated telemetry
+2024-08-03 14:50:28,519 INFO    MainThread:3609147 [wandb_init.py:init():753] communicating run to backend with 90.0 second timeout
+2024-08-03 14:50:29,011 INFO    MainThread:3609147 [wandb_run.py:_on_init():2262] communicating current version
+2024-08-03 14:50:29,153 INFO    MainThread:3609147 [wandb_run.py:_on_init():2271] got version response upgrade_message: "wandb version 0.17.5 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-08-03 14:50:29,153 INFO    MainThread:3609147 [wandb_init.py:init():804] starting run threads in backend
+2024-08-03 14:50:51,582 INFO    MainThread:3609147 [wandb_run.py:_console_start():2241] atexit reg
+2024-08-03 14:50:51,584 INFO    MainThread:3609147 [wandb_run.py:_redirect():2096] redirect: wrap_raw
+2024-08-03 14:50:51,584 INFO    MainThread:3609147 [wandb_run.py:_redirect():2161] Wrapping output streams.
+2024-08-03 14:50:51,585 INFO    MainThread:3609147 [wandb_run.py:_redirect():2186] Redirects installed.
+2024-08-03 14:50:51,587 INFO    MainThread:3609147 [wandb_init.py:init():847] run started, returning control to user process
+2024-08-03 14:50:51,594 INFO    MainThread:3609147 [wandb_run.py:_config_callback():1343] config_cb None None {'pretrained_teacher_model': '/home/haoyum3/GeoWizard_edit/sdv2', 'pretrained_vae_model_name_or_path': None, 'teacher_revision': None, 'revision': None, 'prediction_type': None, 'output_dir': 'outputs/lora_64_fuyun_PCM_2phases_adv', 'cache_dir': None, 'seed': 453645634, 'logging_dir': 'logs', 'report_to': 'wandb', 'checkpointing_steps': 1000, 'checkpoints_total_limit': 10, 'resume_from_checkpoint': 'latest', 'resolution': 512, 'center_crop': False, 'random_flip': False, 'dataloader_num_workers': 16, 'dataset_path': '/home/haoyum3/GeoWizard_edit/hypersim', 'train_batch_size': 1, 'num_train_epochs': 103, 'max_train_steps': 10000, 'max_train_samples': 4000000, 'learning_rate': 5e-06, 'scale_lr': False, 'lr_scheduler': 'constant', 'lr_warmup_steps': 500, 'gradient_accumulation_steps': 1, 'use_8bit_adam': True, 'adam_beta1': 0.9, 'adam_beta2': 0.999, 'adam_weight_decay': 0.001, 'adam_epsilon': 1e-08, 'max_grad_norm': 1.0, 'proportion_empty_prompts': 0, 'w_min': 4.0, 'w_max': 5.0, 'num_ddim_timesteps': 50, 'loss_type': 'huber', 'huber_c': 0.001, 'lora_rank': 64, 'mixed_precision': 'fp16', 'allow_tf32': False, 'cast_teacher_unet': False, 'enable_xformers_memory_efficient_attention': True, 'gradient_checkpointing': True, 'local_rank': -1, 'validation_steps': 500, 'push_to_hub': False, 'hub_token': None, 'hub_model_id': None, 'tracker_project_name': 'lora_64_formal_fuyun_PCM_2phases_adv', 'not_apply_cfg_solver': True, 'multiphase': 2, 'adv_weight': 0.1, 'adv_lr': 1e-05}
+2024-08-03 14:54:40,762 WARNING MsgRouterThr:3609147 [router.py:message_loop():77] message_loop has been closed

@@ -316,13 +316,15 @@ def scalings_for_boundary_conditions_online(index, selected_indices):
 
 def predicted_origin(model_output, timesteps, sample, prediction_type, alphas, sigmas):
     if prediction_type == "epsilon":
+        rgb_latents,geo_latents=sample.chunk(2,dim=1)
         sigmas = extract_into_tensor(sigmas, timesteps, sample.shape)
         alphas = extract_into_tensor(alphas, timesteps, sample.shape)
-        pred_x_0 = (sample - sigmas * model_output) / alphas
+        pred_x_0 = (geo_latents - sigmas * model_output) / alphas
     elif prediction_type == "v_prediction":
+        rgb_latents,geo_latents=sample.chunk(2,dim=1)
         sigmas = extract_into_tensor(sigmas, timesteps, sample.shape)
         alphas = extract_into_tensor(alphas, timesteps, sample.shape)
-        pred_x_0 = alphas * sample - sigmas * model_output
+        pred_x_0 = alphas * geo_latents - sigmas * model_output
     else:
         raise ValueError(f"Prediction type {prediction_type} currently not supported.")
     return pred_x_0
@@ -927,9 +929,15 @@ def main(args):
     )
 
     # 5. Load teacher U-Net from SD-XL checkpoint
-    teacher_unet = UNet2DConditionModel.from_pretrained(
-        args.pretrained_teacher_model, subfolder="unet", revision=args.teacher_revision
-    )
+    teacher_unet = UNet2DConditionModel.from_pretrained(args.pretrained_teacher_model, subfolder="unet",
+                                                    in_channels=8, sample_size=96,
+                                                    class_embed_type = 'projection',
+                                                    projection_class_embeddings_input_dim = 14,
+                                                    cross_attention_dim = 768,
+                                                    low_cpu_mem_usage=False,
+                                                    ignore_mismatched_sizes=True)
+    sd2_conv_in = UNet2DConditionModel.from_pretrained(args.pretrained_teacher_model, subfolder="unet",revision=args.teacher_revision).conv_in
+    teacher_unet.conv_in.weight = Parameter(sd2_conv_in.weight.repeat(1,2,1,1) / 2)
 
     image_encoder = CLIPVisionModelWithProjection.from_pretrained(
         'lambdalabs/sd-image-variations-diffusers', subfolder="image_encoder",revision=args.teacher_revision
@@ -953,10 +961,19 @@ def main(args):
         discriminator_params.append(param)
 
     # 7. Create online (`unet`) student U-Nets.
-    unet = UNet2DConditionModel.from_pretrained(
-        args.pretrained_teacher_model, subfolder="unet", revision=args.teacher_revision
-    )
-
+    # unet = UNet2DConditionModel.from_pretrained(
+    #     args.pretrained_teacher_model, subfolder="unet", revision=args.teacher_revision
+    # )
+    unet = UNet2DConditionModel.from_pretrained(args.pretrained_teacher_model, subfolder="unet",
+                                                    in_channels=8, sample_size=96,
+                                                    class_embed_type = 'projection',
+                                                    projection_class_embeddings_input_dim = 14,
+                                                    cross_attention_dim = 768,
+                                                    low_cpu_mem_usage=False,
+                                                    ignore_mismatched_sizes=True)
+    sd2_conv_in = UNet2DConditionModel.from_pretrained(args.pretrained_teacher_model, subfolder="unet",revision=args.teacher_revision).conv_in
+    unet.conv_in.weight = Parameter(sd2_conv_in.weight.repeat(1,2,1,1) / 2)
+    logger.info("loading the unet input layer from {}".format(args.pretrained_teacher_model), main_process_only=True)
     unet.train()
 
     # Check that all trainable models are in full precision
@@ -1003,9 +1020,9 @@ def main(args):
 
     # Move unet, vae and text_encoder to device and cast to weight_dtype
     # The VAE is in float32 to avoid NaN losses.
-    vae.to(accelerator.device)
-    if args.pretrained_vae_model_name_or_path is not None:
-        vae.to(dtype=weight_dtype)
+    vae.to(accelerator.device,dtype=weight_dtype)
+    # if args.pretrained_vae_model_name_or_path is not None:
+    #     vae.to(dtype=weight_dtype)
     text_encoder.to(accelerator.device, dtype=weight_dtype)
     image_encoder.to(accelerator.device, dtype=weight_dtype)
     # Also move the alpha and sigma noise schedules to accelerator.device.
@@ -1300,8 +1317,22 @@ def main(args):
             
                 # in the Stable Diffusion, the iterations numbers is 1000 for adding the noise and denosing.
                 # Sample a random timestep for each image
-                timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=depth_latents.device).repeat(4) # 2
-                timesteps = timesteps.long()
+                # timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=depth_latents.device).repeat(4) # 2
+                # timesteps = timesteps.long()
+                topk = (
+                    noise_scheduler.config.num_train_timesteps
+                    // args.num_ddim_timesteps
+                )
+                index = torch.randint(
+                    0, args.num_ddim_timesteps, (bsz,), device=geo_latents.device
+                ).long().repeat(4)
+
+                start_timesteps = solver.ddim_timesteps[index]
+                #############################
+                timesteps = start_timesteps - topk
+                timesteps = torch.where(
+                    timesteps < 0, torch.zeros_like(timesteps), timesteps
+                )
 
                 # Sample noise that we'll add to the latents
                 noise = pyramid_noise_like(geo_latents, timesteps) # create multi-res. noise
@@ -1340,20 +1371,6 @@ def main(args):
                 unet_input = torch.cat((rgb_latents.repeat(4,1,1,1), noisy_geo_latents), dim=1) #2
                 #print("unet input shape:",unet_input.shape)
                 #print("timesteps shape:",timesteps.shape)
-
-                topk = (
-                    noise_scheduler.config.num_train_timesteps
-                    // args.num_ddim_timesteps
-                )
-                index = torch.randint(
-                    0, args.num_ddim_timesteps, (bsz,), device=geo_latents.device
-                ).long()
-
-                start_timesteps = solver.ddim_timesteps[index]
-                timesteps = start_timesteps - topk
-                timesteps = torch.where(
-                    timesteps < 0, torch.zeros_like(timesteps), timesteps
-                )
 
                 inference_indices = np.linspace(
                     0, len(solver.ddim_timesteps), num=args.multiphase, endpoint=False
@@ -1407,7 +1424,7 @@ def main(args):
                 model_pred, end_timesteps = solver.ddim_style_multiphase_pred(
                     pred_x_0, noise_pred, index, args.multiphase
                 )
-                model_pred = c_skip_start * unet_input + c_out_start * model_pred
+                model_pred = c_skip_start * noisy_geo_latents + c_out_start * model_pred
 
                 adv_timesteps = torch.empty_like(end_timesteps)
 
@@ -1422,8 +1439,9 @@ def main(args):
                     )
 
                 fake_adv = noise_scheduler.noise_travel(
-                    model_pred, torch.randn_like(unet_input), end_timesteps, adv_timesteps
+                    model_pred, torch.randn_like(model_pred), end_timesteps, adv_timesteps
                 )
+                fake_adv = torch.cat((rgb_latents.repeat(4,1,1,1),fake_adv),dim=1)
 
                 # 20.4.10. Use the ODE solver to predict the kth step in the augmented PF-ODE trajectory after
                 # noisy_latents with both the conditioning embedding c and unconditional embedding 0
@@ -1470,8 +1488,9 @@ def main(args):
                             cond_teacher_output - uncond_teacher_output
                         )
                         x_prev = solver.ddim_step(pred_x0, pred_noise, index)
-
-                                        # 20.4.12. Get target LCM prediction on x_prev, w, c, t_n
+                        geo_prev=x_prev
+                        x_prev = torch.cat([rgb_latents.repeat(4,1,1,1),x_prev],dim=1)
+                # 20.4.12. Get target LCM prediction on x_prev, w, c, t_n
                 with torch.no_grad():
                     with torch.autocast("cuda", dtype=weight_dtype):
                         target_noise_pred = unet(
@@ -1492,7 +1511,7 @@ def main(args):
                     target, end_timesteps = solver.ddim_style_multiphase_pred(
                         pred_x_0, target_noise_pred, index, args.multiphase
                     )
-                    target = c_skip * x_prev + c_out * target
+                    target = c_skip * geo_prev + c_out * target
 
 
                 if global_step % 2 == 0:
@@ -1500,8 +1519,9 @@ def main(args):
 
                     # adversarial consistency loss
                     real_adv = noise_scheduler.noise_travel(
-                        target.float(), torch.randn_like(unet_input), end_timesteps, adv_timesteps
+                        target.float(), torch.randn_like(target), end_timesteps, adv_timesteps
                     )
+                    real_adv = torch.cat((rgb_latents.repeat(4,1,1,1),real_adv),dim=1)
                     #discriminator
                     loss = discriminator(
                         "d_loss",
@@ -1510,6 +1530,7 @@ def main(args):
                         adv_timesteps,
                         batch_imgs_embed.float(),
                         1.0,
+                        class_embedding,
                     )
                     accelerator.backward(loss)
                     if accelerator.sync_gradients:
@@ -1540,6 +1561,7 @@ def main(args):
                         adv_timesteps,
                         batch_imgs_embed.float(),
                         1.0,
+                        class_embedding,
                     )
                     loss += g_loss
 

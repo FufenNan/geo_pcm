@@ -1,0 +1,46 @@
+08/03/2024 15:31:02 - INFO - __main__ - ***** Running training *****
+08/03/2024 15:31:02 - INFO - __main__ -   Num batches each epoch = 98
+08/03/2024 15:31:02 - INFO - __main__ -   Num Epochs = 103
+08/03/2024 15:31:02 - INFO - __main__ -   Instantaneous batch size per device = 1
+08/03/2024 15:31:02 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 1
+08/03/2024 15:31:02 - INFO - __main__ -   Gradient Accumulation steps = 1
+08/03/2024 15:31:02 - INFO - __main__ -   Total optimization steps = 10000
+Steps:   0%|                                                                                                             | 0/10000 [00:00<?, ?it/s]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

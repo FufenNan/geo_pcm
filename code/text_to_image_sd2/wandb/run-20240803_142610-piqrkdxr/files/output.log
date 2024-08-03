@@ -1,0 +1,34 @@
+08/03/2024 14:26:24 - INFO - __main__ - ***** Running training *****
+08/03/2024 14:26:24 - INFO - __main__ -   Num batches each epoch = 98
+08/03/2024 14:26:24 - INFO - __main__ -   Num Epochs = 103
+08/03/2024 14:26:24 - INFO - __main__ -   Instantaneous batch size per device = 1
+08/03/2024 14:26:24 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 1
+08/03/2024 14:26:24 - INFO - __main__ -   Gradient Accumulation steps = 1
+08/03/2024 14:26:24 - INFO - __main__ -   Total optimization steps = 10000
+Steps:   0%|                                                                                                             | 0/10000 [00:00<?, ?it/s]
+Steps:   0%|                                                                                                             | 0/10000 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/pydevd.py", line 3489, in <module>
+    main()
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/pydevd.py", line 3482, in main
+    globals = debugger.run(setup['file'], None, None, is_module)
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/pydevd.py", line 2510, in run
+    return self._exec(is_module, entry_point_fn, module_name, file, globals, locals)
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/pydevd.py", line 2517, in _exec
+    globals = pydevd_runpy.run_path(file, globals, '__main__')
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 321, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 135, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/home/haoyum3/.vscode-server/extensions/ms-python.debugpy-2024.10.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 124, in _run_code
+    exec(code, run_globals)
+  File "train_pcm_lora_adv_decom.py", line 2025, in <module>
+    args = parse_args()
+  File "train_pcm_lora_adv_decom.py", line 1471, in main
+    uncond_teacher_output = teacher_unet(
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/diffusers/models/unets/unet_2d_condition.py", line 983, in forward
+    raise ValueError("class_labels should be provided when num_class_embeds > 0")
+ValueError: class_labels should be provided when num_class_embeds > 0

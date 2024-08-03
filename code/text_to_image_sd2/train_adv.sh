@@ -30,8 +30,7 @@ accelerate launch --config_file /home/haoyum3/PCM/Phased-Consistency-Model/code/
     --multiphase=2 \
     --gradient_checkpointing \
     --adv_weight=0.1 \
-    --adv_lr=1e-5 
-
+    --adv_lr=1e-5 \
 # multiphase: The number of sub-trajectories that we hope to split the PF-ODE into.
 # w_min and w_max: We set a larger value of CFG in our official weights. But we find it would be better to set it a bit smaller.
 # set adv weight adn adv lr for proper training configure

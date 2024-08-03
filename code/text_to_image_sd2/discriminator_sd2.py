@@ -11,7 +11,9 @@ from diffusers.utils import (
     scale_lora_layers,
     unscale_lora_layers,
 )
-
+from diffusers.models.embeddings import (
+    TimestepEmbedding,
+)
 
 def modified_forward(
     self,
@@ -89,6 +91,7 @@ def modified_forward(
     # upsample size should be forwarded when sample is not a multiple of `default_overall_up_factor`
     forward_upsample_size = False
     upsample_size = None
+    #sample [4*bsz,4,h,w]
     for dim in sample.shape[-2:]:
         if dim % default_overall_up_factor != 0:
             # Forward upsample size to force interpolation output size.
@@ -392,8 +395,8 @@ class Discriminator(nn.Module):
             ]
         )
 
-    def _forward(self, sample, timestep, encoder_hidden_states):
-        features = modified_forward(self.unet, sample, timestep, encoder_hidden_states)
+    def _forward(self, sample, timestep, encoder_hidden_states,class_labels):
+        features = modified_forward(self.unet, sample, timestep, encoder_hidden_states,class_labels)
         assert self.head_num == len(features)
         outputs = []
         for feature, head in zip(features, self.heads):
@@ -409,13 +412,13 @@ class Discriminator(nn.Module):
         else:
             assert 0, "not supported"
 
-    def d_loss(self, sample_fake, sample_real, timestep, encoder_hidden_states, weight):
+    def d_loss(self, sample_fake, sample_real, timestep, encoder_hidden_states, weight, class_labels):
         loss = 0.0
         fake_outputs = self._forward(
-            sample_fake.detach(), timestep, encoder_hidden_states
+            sample_fake.detach(), timestep, encoder_hidden_states,class_labels
         )
         real_outputs = self._forward(
-            sample_real.detach(), timestep, encoder_hidden_states
+            sample_real.detach(), timestep, encoder_hidden_states,class_labels
         )
         for fake_output, real_output in zip(fake_outputs, real_outputs):
             loss += (
@@ -424,9 +427,9 @@ class Discriminator(nn.Module):
             ) / (self.head_num * self.num_h_per_head)
         return loss
 
-    def g_loss(self, sample_fake, timestep, encoder_hidden_states, weight):
+    def g_loss(self, sample_fake, timestep, encoder_hidden_states, weight,class_labels):
         loss = 0.0
-        fake_outputs = self._forward(sample_fake, timestep, encoder_hidden_states)
+        fake_outputs = self._forward(sample_fake, timestep, encoder_hidden_states,class_labels)
         for fake_output in fake_outputs:
             loss += torch.mean(weight * torch.relu(1 - fake_output.float())) / (
                 self.head_num * self.num_h_per_head
@@ -434,14 +437,14 @@ class Discriminator(nn.Module):
         return loss
 
     def feature_loss(
-        self, sample_fake, sample_real, timestep, encoder_hidden_states, weight
+        self, sample_fake, sample_real, timestep, encoder_hidden_states, weight,class_labels
     ):
         loss = 0.0
         features_fake = modified_forward(
-            self.unet, sample_fake, timestep, encoder_hidden_states
+            self.unet, sample_fake, timestep, encoder_hidden_states,class_labels
         )
         features_real = modified_forward(
-            self.unet, sample_real.detach(), timestep, encoder_hidden_states
+            self.unet, sample_real.detach(), timestep, encoder_hidden_states,class_labels
         )
         for feature_fake, feature_real in zip(features_fake, features_real):
             loss += torch.mean((feature_fake - feature_real) ** 2) / (self.head_num)
