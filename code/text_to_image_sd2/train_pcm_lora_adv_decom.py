@@ -13,37 +13,72 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 
-import argparse
-import functools
-import gc
-import logging
-import math
 import os
+import sys
+import gc
+import math
 import random
 import shutil
+import logging
+import argparse
+import functools
 from pathlib import Path
-from PIL import Image
-# os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
-os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3'
-import accelerate
+from packaging import version
+
 import numpy as np
+import cv2
+from PIL import Image
+
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint
-import transformers
+from torch.nn.parameter import Parameter
+from torch.utils.data import DataLoader, Dataset
+from torch.optim import RMSprop
+
+import torchvision
+from torchvision import transforms
+import torchvision.transforms.functional as TF
+from torchvision.transforms import InterpolationMode
+
+import accelerate
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import ProjectConfiguration, set_seed
-from huggingface_hub import create_repo
-from packaging import version
-from peft import LoraConfig, get_peft_model, get_peft_model_state_dict
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms
-from tqdm.auto import tqdm
-from transformers import AutoTokenizer, CLIPTextModel, PretrainedConfig
-from torch.optim import RMSprop
+from accelerate.state import AcceleratorState
+
+import transformers
+from transformers import (
+    AutoTokenizer, CLIPTextModel, PretrainedConfig, 
+    CLIPImageProcessor, CLIPVisionModelWithProjection,
+    CLIPTokenizer
+)
+from transformers.utils import ContextManagers
 
 import diffusers
+from diffusers import (
+    DiffusionPipeline, DDPMScheduler, DDIMScheduler, AutoencoderKL
+)
+from diffusers.optimization import get_scheduler
+from diffusers.training_utils import EMAModel
+from diffusers.utils import (
+    check_min_version, deprecate, is_wandb_available, 
+    make_image_grid, is_xformers_available
+)
+from diffusers.utils.torch_utils import is_compiled_module
+from peft import LoraConfig, get_peft_model, get_peft_model_state_dict
+from huggingface_hub import create_repo
+from tqdm.auto import tqdm
+from models.unet_2d_condition import UNet2DConditionModel
+from utils.de_normalized import align_scale_shift
+from utils.depth2normal import *
+from utils.dataset_configuration import (
+    prepare_dataset, depth_scale_shift_normalization, 
+    resize_max_res_tensor
+)
+
+
 from diffusers import (
     AutoencoderKL,
     DDIMScheduler,
@@ -54,7 +89,7 @@ from scheduling_ddpm_modified import DDPMScheduler
 from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version, is_wandb_available
 from diffusers.utils.import_utils import is_xformers_available
-from discriminator_sd15 import Discriminator
+from discriminator_sd2 import Discriminator
 
 
 MAX_SEQ_LENGTH = 77
@@ -391,7 +426,18 @@ def import_model_class_from_model_name_or_path(
         return CLIPTextModelWithProjection
     else:
         raise ValueError(f"{model_class} is not supported.")
-
+    
+def pyramid_noise_like(x, timesteps, discount=0.9):
+    b, c, w_ori, h_ori = x.shape 
+    u = nn.Upsample(size=(w_ori, h_ori), mode='bilinear')
+    noise = torch.randn_like(x)
+    scale = 1.5
+    for i in range(10):
+        r = np.random.random()*scale + scale # Rather than always going 2x, 
+        w, h = max(1, int(w_ori/(r**i))), max(1, int(h_ori/(r**i)))
+        noise += u(torch.randn(b, c, w, h).to(x)) * (timesteps[...,None,None,None]/1000) * discount**i
+        if w==1 or h==1: break # Lowest resolution is 1x1
+    return noise/noise.std() # Scaled back to roughly unit variance
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
@@ -425,6 +471,12 @@ def parse_args():
         help="Revision of pretrained LDM model identifier from huggingface.co/models.",
     )
     # ----------Training Arguments----------
+    parser.add_argument(
+        "--prediction_type",
+        type=str,
+        default=None,
+        help="The prediction_type that shall be used for training. Choose between 'epsilon' or 'v_prediction' or leave `None`. If left to `None` the default prediction type of the scheduler: `noise_scheduler.config.prediciton_type` is chosen.",
+    )
     # ----General Training Arguments----
     parser.add_argument(
         "--output_dir",
@@ -519,6 +571,12 @@ def parse_args():
         ),
     )
     # ----Batch Size and Training Steps----
+    parser.add_argument(
+        "--dataset_path",
+        type=str,
+        default="/home/haoyum3/GeoWizard_edit/hypersim",
+        help="Path to the training dataloader.",
+    )
     parser.add_argument(
         "--train_batch_size",
         type=int,
@@ -794,12 +852,6 @@ def main(args):
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
-        # project_config={
-        #     'project_dir':args.output_dir, 
-        #     'logging_dir':logging_dir,
-        #     'num_processes': args.num_processes,
-        #     'gpu_ids': args.gpu_ids
-        # }
         project_config=accelerator_project_config,
     )
 
@@ -879,8 +931,16 @@ def main(args):
         args.pretrained_teacher_model, subfolder="unet", revision=args.teacher_revision
     )
 
+    image_encoder = CLIPVisionModelWithProjection.from_pretrained(
+        'lambdalabs/sd-image-variations-diffusers', subfolder="image_encoder",revision=args.teacher_revision
+    )
+    feature_extractor = CLIPImageProcessor.from_pretrained(
+        'lambdalabs/sd-image-variations-diffusers', subfolder="feature_extractor",revision=args.teacher_revision
+    )
+    clip_image_mean = torch.as_tensor(feature_extractor.image_mean)[:,None,None].to(accelerator.device, dtype=torch.float32)
+    clip_image_std = torch.as_tensor(feature_extractor.image_std)[:,None,None].to(accelerator.device, dtype=torch.float32)
+    
     discriminator = Discriminator(teacher_unet)
-
     # 6. Freeze teacher vae, text_encoder, and teacher_unet
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
@@ -947,7 +1007,7 @@ def main(args):
     if args.pretrained_vae_model_name_or_path is not None:
         vae.to(dtype=weight_dtype)
     text_encoder.to(accelerator.device, dtype=weight_dtype)
-
+    image_encoder.to(accelerator.device, dtype=weight_dtype)
     # Also move the alpha and sigma noise schedules to accelerator.device.
     alpha_schedule = alpha_schedule.to(accelerator.device)
     sigma_schedule = sigma_schedule.to(accelerator.device)
@@ -1058,16 +1118,18 @@ def main(args):
         tokenizer=tokenizer,
     )
 
-    train_dataset = CustomImageDataset(
-        #change to my dataset
-        "/home/haoyum3/PCM/cc3m/data", args.resolution
-    )
-    train_dataloader = DataLoader(
-        train_dataset,
-        shuffle=True,
-        batch_size=args.train_batch_size,
-        num_workers=args.dataloader_num_workers,
-    )
+    with accelerator.main_process_first():
+        train_dataloader, dataset_config_dict = prepare_dataset(data_dir=args.dataset_path,
+                                                                    batch_size=args.train_batch_size,
+                                                                    test_batch=1,
+                                                                    datathread=args.dataloader_num_workers,
+                                                                    logger=logger)
+    # train_dataloader = DataLoader(
+    #     train_dataset,
+    #     shuffle=True,
+    #     batch_size=args.train_batch_size,
+    #     num_workers=args.dataloader_num_workers,
+    # )
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
@@ -1117,12 +1179,15 @@ def main(args):
         tracker_config = dict(vars(args))
         accelerator.init_trackers(args.tracker_project_name, config=tracker_config)
 
+    #[bsz,77]
     uncond_input_ids = tokenizer(
         [""] * args.train_batch_size,
         return_tensors="pt",
         padding="max_length",
         max_length=77,
     ).input_ids.to(accelerator.device)
+
+    #[bsz,77,1024]
     uncond_prompt_embeds = text_encoder(uncond_input_ids)[0]
 
     # Train!
@@ -1182,37 +1247,106 @@ def main(args):
     for epoch in range(first_epoch, args.num_train_epochs):
         for step, batch in enumerate(train_dataloader):
             with accelerator.accumulate(unet):
-                image, text = batch
+                image_data = batch['rgb'].clip(-1., 1.)
+                image_data.to(accelerator.device, non_blocking=True)
+                image_data_resized = resize_max_res_tensor(image_data, mode='rgb')
 
-                image = image.to(accelerator.device, non_blocking=True)
-                encoded_text = compute_embeddings_fn(text)
+                device = image_data.device
+                
+                imgs_in_proc = TF.resize((image_data_resized +1)/2, 
+                    (feature_extractor.crop_size['height'], feature_extractor.crop_size['width']), 
+                    interpolation=InterpolationMode.BICUBIC, 
+                    antialias=True
+                )
+                # do the normalization in float32 to preserve precision
+                imgs_in_proc = ((imgs_in_proc.float() - clip_image_mean) / clip_image_std).to(weight_dtype)        
+                imgs_embed= image_encoder(imgs_in_proc).image_embeds.unsqueeze(1).to(weight_dtype)
 
-                pixel_values = image.to(dtype=weight_dtype)
-                if vae.dtype != weight_dtype:
-                    vae.to(dtype=weight_dtype)
+                depth = batch['depth']
+                depth_stacked = depth.repeat(1,3,1,1)
+                depth_resized = resize_max_res_tensor(depth_stacked, mode='depth') 
+                depth_resized_normalized = depth_scale_shift_normalization(depth_resized)
+                #print("depth shape:",depth.shape)
+                #print("depth stack shape:",depth_stacked.shape)
+                #print("depth resized shape:",depth_resized.shape)
+                #print("depth resized normalized shape:",depth_resized_normalized.shape)
 
-                # encode pixel values with batch size of at most 32
-                latents = []
-                for i in range(0, pixel_values.shape[0], 32):
-                    latents.append(
-                        vae.encode(pixel_values[i : i + 32]).latent_dist.sample()
-                    )
-                latents = torch.cat(latents, dim=0)
+                normal = batch['normal'].clip(-1., 1.)
+                normal_resized = resize_max_res_tensor(normal, mode='normal')
+                #print("normal shape:",normal.shape)
+                #print("normal resized shape:",normal_resized.shape)
 
-                latents = latents * vae.config.scaling_factor
-                latents = latents.to(weight_dtype)
+                # add 
+                albedo = batch['albedo'].clip(-1., 1.)
+                albedo_resized = resize_max_res_tensor(albedo, mode='albedo')
+
+                shading = batch['shading'].clip(-1., 1.)
+                shading_resized = resize_max_res_tensor(shading, mode='shading')
+
+                # encode latents
+                #h_batch = vae.encoder(torch.cat((image_data_resized, depth_resized_normalized, normal_resized), dim=0).to(weight_dtype))
+                h_batch = vae.encoder(torch.cat((image_data_resized, depth_resized_normalized, normal_resized,
+                                                    albedo_resized, shading_resized), dim=0).to(weight_dtype))
+                moments_batch = vae.quant_conv(h_batch)
+                mean_batch, logvar_batch = torch.chunk(moments_batch, 2, dim=1)
+                batch_latents = mean_batch * vae.config.scaling_factor
+                #rgb_latents, depth_latents, normal_latents = torch.chunk(batch_latents, 3, dim=0)
+                #geo_latents = torch.cat((depth_latents, normal_latents), dim=0)
+                rgb_latents, depth_latents, normal_latents, albedo_latents, shading_latents = torch.chunk(batch_latents, 5, dim=0)
+                geo_latents = torch.cat((depth_latents, normal_latents, albedo_latents, shading_latents), dim=0)
+
+                # here is the setting batch size, in our settings, it can be 1.0
+                bsz = rgb_latents.shape[0]
+            
+                # in the Stable Diffusion, the iterations numbers is 1000 for adding the noise and denosing.
+                # Sample a random timestep for each image
+                timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=depth_latents.device).repeat(4) # 2
+                timesteps = timesteps.long()
 
                 # Sample noise that we'll add to the latents
-                noise = torch.randn_like(latents)
-                bsz = latents.shape[0]
+                noise = pyramid_noise_like(geo_latents, timesteps) # create multi-res. noise
+                
+                # add noise to the depth lantents
+                noisy_geo_latents = noise_scheduler.add_noise(geo_latents, noise, timesteps)
 
-                # Sample a random timestep for each image t_n ~ U[0, N - k - 1] without bias.
+                # Get the target for loss depending on the prediction type
+                if args.prediction_type is not None:
+                    # set prediction_type of scheduler if defined
+                    noise_scheduler.register_to_config(prediction_type=args.prediction_type)
+                if noise_scheduler.config.prediction_type == "epsilon":
+                    target = noise
+                elif noise_scheduler.config.prediction_type == "v_prediction":
+                    target = noise_scheduler.get_velocity(geo_latents, noise, timesteps)
+                else:
+                    raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
+
+                #batch_imgs_embed = imgs_embed.repeat((2, 1, 1))  # [B*2, 1, 768] 2
+                batch_imgs_embed = imgs_embed.repeat((4, 1, 1))  # [B*2, 1, 768] 2
+                
+                # hybrid hierarchical switcher 
+                #geo_class = torch.tensor([[0, 1], [1, 0]], dtype=weight_dtype, device=device)
+                #geo_embedding = torch.cat([torch.sin(geo_class), torch.cos(geo_class)], dim=-1).repeat_interleave(bsz, 0)
+                geo_class = torch.tensor([[0, 0, 0,1], [0, 0, 1,0], [0,1,0,0],[1,0,0,0]], dtype=weight_dtype, device=device)
+                geo_embedding = torch.cat([torch.sin(geo_class), torch.cos(geo_class)], dim=-1).repeat_interleave(bsz, 0)
+
+                domain_class = batch['domain'].to(weight_dtype)
+                domain_embedding = torch.cat([torch.sin(domain_class), torch.cos(domain_class)], dim=-1).repeat(4,1)# 2
+                #print("geo_embedding shape:",geo_embedding.shape)
+                #print("domain_embedding shape:",domain_embedding.shape)
+
+                class_embedding = torch.cat((geo_embedding, domain_embedding), dim=-1)
+
+                # predict the noise residual and compute the loss.
+                unet_input = torch.cat((rgb_latents.repeat(4,1,1,1), noisy_geo_latents), dim=1) #2
+                #print("unet input shape:",unet_input.shape)
+                #print("timesteps shape:",timesteps.shape)
+
                 topk = (
                     noise_scheduler.config.num_train_timesteps
                     // args.num_ddim_timesteps
                 )
                 index = torch.randint(
-                    0, args.num_ddim_timesteps, (bsz,), device=latents.device
+                    0, args.num_ddim_timesteps, (bsz,), device=geo_latents.device
                 ).long()
 
                 start_timesteps = solver.ddim_timesteps[index]
@@ -1232,60 +1366,39 @@ def main(args):
                 c_skip_start, c_out_start = scalings_for_boundary_conditions_online(
                     index, inference_indices
                 )
+                #[bsz,1,1,1]
                 c_skip_start, c_out_start = [
-                    append_dims(x, latents.ndim) for x in [c_skip_start, c_out_start]
+                    append_dims(x,unet_input.ndim) for x in [c_skip_start, c_out_start]
                 ]
                 c_skip, c_out = scalings_for_boundary_conditions_target(
                     index, inference_indices
                 )
-                c_skip, c_out = [append_dims(x, latents.ndim) for x in [c_skip, c_out]]
-
-                #  Debug
-                # if accelerator.is_main_process:
-                #     print("index", index.flatten())
-                #     print("c_skip_start", c_skip_start.flatten())
-                #     print("c_out_start", c_out_start.flatten())
-                #     print("c_skip", c_skip.flatten())
-                #     print("c_out", c_out.flatten())
-
-                # 20.4.5. Add noise to the latents according to the noise magnitude at each timestep
-                # (this is the forward diffusion process) [z_{t_{n + k}} in Algorithm 1]
-                noisy_model_input = noise_scheduler.add_noise(
-                    latents, noise, start_timesteps
-                )
+                c_skip, c_out = [append_dims(x, unet_input.ndim) for x in [c_skip, c_out]]
 
                 # 20.4.6. Sample a random guidance scale w from U[w_min, w_max] and embed it
                 w = (args.w_max - args.w_min) * torch.rand((bsz,)) + args.w_min
                 w = w.reshape(bsz, 1, 1, 1)
-                w = w.to(device=latents.device, dtype=latents.dtype)
+                w = w.to(device=unet_input.device, dtype=unet_input.dtype)
+                #unet should be replaced
+                noise_pred = unet(unet_input, 
+                                timesteps, 
+                                encoder_hidden_states=batch_imgs_embed,
+                                class_labels=class_embedding).sample
 
-                # 20.4.8. Prepare prompt embeds and unet_added_conditions
-                prompt_embeds = encoded_text.pop("prompt_embeds")
-
-                # 20.4.9. Get online LCM prediction on z_{t_{n + k}}, w, c, t_{n + k}
-                # print(encoded_text) # {}
-                noise_pred = unet(
-                    noisy_model_input,
-                    start_timesteps,
-                    timestep_cond=None,
-                    encoder_hidden_states=prompt_embeds.float(), 
-                    added_cond_kwargs=encoded_text,
-                ).sample
-
-                epsilon_reconstruction_pred = noise_pred
-                x0_reconstruction_pred = predicted_origin(
-                    noise_pred,
-                    start_timesteps,
-                    noisy_model_input,
-                    noise_scheduler.config.prediction_type,
-                    alpha_schedule,
-                    sigma_schedule,
-                )
+                # epsilon_reconstruction_pred = noise_pred
+                # x0_reconstruction_pred = predicted_origin(
+                #     noise_pred,
+                #     start_timesteps,
+                #     noisy_model_input,
+                #     noise_scheduler.config.prediction_type,
+                #     alpha_schedule,
+                #     sigma_schedule,
+                # )
 
                 pred_x_0 = predicted_origin(
                     noise_pred,
                     start_timesteps,
-                    noisy_model_input,
+                    unet_input,
                     noise_scheduler.config.prediction_type,
                     alpha_schedule,
                     sigma_schedule,
@@ -1294,7 +1407,7 @@ def main(args):
                 model_pred, end_timesteps = solver.ddim_style_multiphase_pred(
                     pred_x_0, noise_pred, index, args.multiphase
                 )
-                model_pred = c_skip_start * noisy_model_input + c_out_start * model_pred
+                model_pred = c_skip_start * unet_input + c_out_start * model_pred
 
                 adv_timesteps = torch.empty_like(end_timesteps)
 
@@ -1308,11 +1421,8 @@ def main(args):
                         device=end_timesteps.device,
                     )
 
-                real_adv = noise_scheduler.add_noise(
-                    latents, torch.randn_like(latents), adv_timesteps
-                ) # not used. 
                 fake_adv = noise_scheduler.noise_travel(
-                    model_pred, torch.randn_like(latents), end_timesteps, adv_timesteps
+                    model_pred, torch.randn_like(unet_input), end_timesteps, adv_timesteps
                 )
 
                 # 20.4.10. Use the ODE solver to predict the kth step in the augmented PF-ODE trajectory after
@@ -1322,32 +1432,34 @@ def main(args):
                 with torch.no_grad():
                     with torch.autocast("cuda"):
                         cond_teacher_output = teacher_unet(
-                            noisy_model_input.float(),
+                            unet_input.float(),
                             start_timesteps,
-                            encoder_hidden_states=prompt_embeds.float(),
+                            encoder_hidden_states=batch_imgs_embed,
+                            class_labels=class_embedding,
                         ).sample
                         cond_pred_x0 = predicted_origin(
                             cond_teacher_output,
                             start_timesteps,
-                            noisy_model_input,
+                            unet_input,
                             noise_scheduler.config.prediction_type,
                             alpha_schedule,
                             sigma_schedule,
                         )
+                        #do not apply
                         if args.not_apply_cfg_solver:
                             uncond_teacher_output = cond_teacher_output
                             uncond_pred_x0 = cond_pred_x0
                         else:
                             # Get teacher model prediction on noisy_latents and unconditional embedding
                             uncond_teacher_output = teacher_unet(
-                                noisy_model_input.float(),
+                                unet_input.float(),
                                 start_timesteps,
                                 encoder_hidden_states=uncond_prompt_embeds.float(),
                             ).sample
                             uncond_pred_x0 = predicted_origin(
                                 uncond_teacher_output,
                                 start_timesteps,
-                                noisy_model_input,
+                                unet_input,
                                 noise_scheduler.config.prediction_type,
                                 alpha_schedule,
                                 sigma_schedule,
@@ -1359,14 +1471,14 @@ def main(args):
                         )
                         x_prev = solver.ddim_step(pred_x0, pred_noise, index)
 
-                # 20.4.12. Get target LCM prediction on x_prev, w, c, t_n
+                                        # 20.4.12. Get target LCM prediction on x_prev, w, c, t_n
                 with torch.no_grad():
                     with torch.autocast("cuda", dtype=weight_dtype):
                         target_noise_pred = unet(
                             x_prev.float(),
                             timesteps,
-                            timestep_cond=None,
-                            encoder_hidden_states=prompt_embeds.float(),
+                            encoder_hidden_states=batch_imgs_embed,
+                            class_labels=class_embedding,
                         ).sample
 
                     pred_x_0 = predicted_origin(
@@ -1388,15 +1500,15 @@ def main(args):
 
                     # adversarial consistency loss
                     real_adv = noise_scheduler.noise_travel(
-                        target.float(), torch.randn_like(latents), end_timesteps, adv_timesteps
+                        target.float(), torch.randn_like(unet_input), end_timesteps, adv_timesteps
                     )
-
+                    #discriminator
                     loss = discriminator(
                         "d_loss",
                         fake_adv.float(),
                         real_adv.float(),
                         adv_timesteps,
-                        prompt_embeds.float(),
+                        batch_imgs_embed.float(),
                         1.0,
                     )
                     accelerator.backward(loss)
@@ -1426,7 +1538,7 @@ def main(args):
                         "g_loss",
                         fake_adv.float(),
                         adv_timesteps,
-                        prompt_embeds.float(),
+                        batch_imgs_embed.float(),
                         1.0,
                     )
                     loss += g_loss
@@ -1533,6 +1645,361 @@ def main(args):
         )
 
     accelerator.end_training()
+
+    #             image, text = batch
+
+    #             image = image.to(accelerator.device, non_blocking=True)
+    #             encoded_text = compute_embeddings_fn(text)
+
+    #             pixel_values = image.to(dtype=weight_dtype)
+    #             if vae.dtype != weight_dtype:
+    #                 vae.to(dtype=weight_dtype)
+
+    #             # encode pixel values with batch size of at most 32
+    #             latents = []
+    #             for i in range(0, pixel_values.shape[0], 32):
+    #                 latents.append(
+    #                     vae.encode(pixel_values[i : i + 32]).latent_dist.sample()
+    #                 )
+    #             #[bsz,4,64,64]
+    #             latents = torch.cat(latents, dim=0)
+
+    #             latents = latents * vae.config.scaling_factor
+    #             latents = latents.to(weight_dtype)
+
+    #             # Sample noise that we'll add to the latents
+    #             noise = torch.randn_like(latents)
+    #             bsz = latents.shape[0]
+
+    #             # Sample a random timestep for each image t_n ~ U[0, N - k - 1] without bias.
+    #             topk = (
+    #                 noise_scheduler.config.num_train_timesteps
+    #                 // args.num_ddim_timesteps
+    #             )
+    #             index = torch.randint(
+    #                 0, args.num_ddim_timesteps, (bsz,), device=latents.device
+    #             ).long()
+
+    #             start_timesteps = solver.ddim_timesteps[index]
+    #             timesteps = start_timesteps - topk
+    #             timesteps = torch.where(
+    #                 timesteps < 0, torch.zeros_like(timesteps), timesteps
+    #             )
+
+    #             inference_indices = np.linspace(
+    #                 0, len(solver.ddim_timesteps), num=args.multiphase, endpoint=False
+    #             )
+    #             inference_indices = np.floor(inference_indices).astype(np.int64)
+    #             inference_indices = (
+    #                 torch.from_numpy(inference_indices).long().to(timesteps.device)
+    #             )
+    #             # 20.4.4. Get boundary scalings for start_timesteps and (end) timesteps.
+    #             c_skip_start, c_out_start = scalings_for_boundary_conditions_online(
+    #                 index, inference_indices
+    #             )
+    #             #[bsz,1,1,1]
+    #             c_skip_start, c_out_start = [
+    #                 append_dims(x, latents.ndim) for x in [c_skip_start, c_out_start]
+    #             ]
+    #             c_skip, c_out = scalings_for_boundary_conditions_target(
+    #                 index, inference_indices
+    #             )
+    #             c_skip, c_out = [append_dims(x, latents.ndim) for x in [c_skip, c_out]]
+
+    #             #  Debug
+    #             # if accelerator.is_main_process:
+    #             #     print("index", index.flatten())
+    #             #     print("c_skip_start", c_skip_start.flatten())
+    #             #     print("c_out_start", c_out_start.flatten())
+    #             #     print("c_skip", c_skip.flatten())
+    #             #     print("c_out", c_out.flatten())
+
+    #             # 20.4.5. Add noise to the latents according to the noise magnitude at each timestep
+    #             # (this is the forward diffusion process) [z_{t_{n + k}} in Algorithm 1]
+    #             noisy_model_input = noise_scheduler.add_noise(
+    #                 latents, noise, start_timesteps
+    #             )
+
+    #             # 20.4.6. Sample a random guidance scale w from U[w_min, w_max] and embed it
+    #             w = (args.w_max - args.w_min) * torch.rand((bsz,)) + args.w_min
+    #             w = w.reshape(bsz, 1, 1, 1)
+    #             w = w.to(device=latents.device, dtype=latents.dtype)
+
+    #             # 20.4.8. Prepare prompt embeds and unet_added_conditions
+    #             prompt_embeds = encoded_text.pop("prompt_embeds")
+
+    #             # 20.4.9. Get online LCM prediction on z_{t_{n + k}}, w, c, t_{n + k}
+    #             # print(encoded_text) # {}
+    #             #[bsz,4,64,64]
+    #             noise_pred = unet(
+    #                 noisy_model_input,
+    #                 start_timesteps,
+    #                 timestep_cond=None,
+    #                 encoder_hidden_states=prompt_embeds.float(), 
+    #                 added_cond_kwargs=encoded_text,
+    #             ).sample
+
+    #             epsilon_reconstruction_pred = noise_pred
+    #             x0_reconstruction_pred = predicted_origin(
+    #                 noise_pred,
+    #                 start_timesteps,
+    #                 noisy_model_input,
+    #                 noise_scheduler.config.prediction_type,
+    #                 alpha_schedule,
+    #                 sigma_schedule,
+    #             )
+
+    #             pred_x_0 = predicted_origin(
+    #                 noise_pred,
+    #                 start_timesteps,
+    #                 noisy_model_input,
+    #                 noise_scheduler.config.prediction_type,
+    #                 alpha_schedule,
+    #                 sigma_schedule,
+    #             )
+
+    #             model_pred, end_timesteps = solver.ddim_style_multiphase_pred(
+    #                 pred_x_0, noise_pred, index, args.multiphase
+    #             )
+    #             model_pred = c_skip_start * noisy_model_input + c_out_start * model_pred
+
+    #             adv_timesteps = torch.empty_like(end_timesteps)
+
+    #             for i in range(end_timesteps.size(0)):
+    #                 adv_timesteps[i] = torch.randint(
+    #                     end_timesteps[i].item(),
+    #                     end_timesteps[i].item()
+    #                     + noise_scheduler.config.num_train_timesteps // args.multiphase,
+    #                     (1,),
+    #                     dtype=end_timesteps.dtype,
+    #                     device=end_timesteps.device,
+    #                 )
+
+    #             real_adv = noise_scheduler.add_noise(
+    #                 latents, torch.randn_like(latents), adv_timesteps
+    #             ) # not used. 
+    #             fake_adv = noise_scheduler.noise_travel(
+    #                 model_pred, torch.randn_like(latents), end_timesteps, adv_timesteps
+    #             )
+
+    #             # 20.4.10. Use the ODE solver to predict the kth step in the augmented PF-ODE trajectory after
+    #             # noisy_latents with both the conditioning embedding c and unconditional embedding 0
+    #             # Get teacher model prediction on noisy_latents and conditional embedding
+
+    #             with torch.no_grad():
+    #                 with torch.autocast("cuda"):
+    #                     cond_teacher_output = teacher_unet(
+    #                         noisy_model_input.float(),
+    #                         start_timesteps,
+    #                         encoder_hidden_states=prompt_embeds.float(),
+    #                     ).sample
+    #                     cond_pred_x0 = predicted_origin(
+    #                         cond_teacher_output,
+    #                         start_timesteps,
+    #                         noisy_model_input,
+    #                         noise_scheduler.config.prediction_type,
+    #                         alpha_schedule,
+    #                         sigma_schedule,
+    #                     )
+    #                     if args.not_apply_cfg_solver:
+    #                         uncond_teacher_output = cond_teacher_output
+    #                         uncond_pred_x0 = cond_pred_x0
+    #                     else:
+    #                         # Get teacher model prediction on noisy_latents and unconditional embedding
+    #                         uncond_teacher_output = teacher_unet(
+    #                             noisy_model_input.float(),
+    #                             start_timesteps,
+    #                             encoder_hidden_states=uncond_prompt_embeds.float(),
+    #                         ).sample
+    #                         uncond_pred_x0 = predicted_origin(
+    #                             uncond_teacher_output,
+    #                             start_timesteps,
+    #                             noisy_model_input,
+    #                             noise_scheduler.config.prediction_type,
+    #                             alpha_schedule,
+    #                             sigma_schedule,
+    #                         )
+    #                     # 20.4.11. Perform "CFG" to get x_prev estimate (using the LCM paper's CFG formulation)
+    #                     pred_x0 = cond_pred_x0 + w * (cond_pred_x0 - uncond_pred_x0)
+    #                     pred_noise = cond_teacher_output + w * (
+    #                         cond_teacher_output - uncond_teacher_output
+    #                     )
+    #                     x_prev = solver.ddim_step(pred_x0, pred_noise, index)
+
+    #             # 20.4.12. Get target LCM prediction on x_prev, w, c, t_n
+    #             with torch.no_grad():
+    #                 with torch.autocast("cuda", dtype=weight_dtype):
+    #                     target_noise_pred = unet(
+    #                         x_prev.float(),
+    #                         timesteps,
+    #                         timestep_cond=None,
+    #                         encoder_hidden_states=prompt_embeds.float(),
+    #                     ).sample
+
+    #                 pred_x_0 = predicted_origin(
+    #                     target_noise_pred,
+    #                     timesteps,
+    #                     x_prev,
+    #                     noise_scheduler.config.prediction_type,
+    #                     alpha_schedule,
+    #                     sigma_schedule,
+    #                 )
+    #                 target, end_timesteps = solver.ddim_style_multiphase_pred(
+    #                     pred_x_0, target_noise_pred, index, args.multiphase
+    #                 )
+    #                 target = c_skip * x_prev + c_out * target
+
+
+    #             if global_step % 2 == 0:
+    #                 optimizer_discriminator.zero_grad(set_to_none=True)
+
+    #                 # adversarial consistency loss
+    #                 real_adv = noise_scheduler.noise_travel(
+    #                     target.float(), torch.randn_like(latents), end_timesteps, adv_timesteps
+    #                 )
+
+    #                 loss = discriminator(
+    #                     "d_loss",
+    #                     fake_adv.float(),
+    #                     real_adv.float(),
+    #                     adv_timesteps,
+    #                     prompt_embeds.float(),
+    #                     1.0,
+    #                 )
+    #                 accelerator.backward(loss)
+    #                 if accelerator.sync_gradients:
+    #                     accelerator.clip_grad_norm_(
+    #                         discriminator.parameters(), args.max_grad_norm
+    #                     )
+    #                 optimizer_discriminator.step()
+    #                 optimizer_discriminator.zero_grad(set_to_none=True)
+
+    #             else:
+    #                 # 20.4.13. Calculate loss
+    #                 if args.loss_type == "l2":
+    #                     loss = F.mse_loss(
+    #                         model_pred.float(), target.float(), reduction="mean"
+    #                     )
+    #                 elif args.loss_type == "huber":
+    #                     loss = torch.mean(
+    #                         torch.sqrt(
+    #                             (model_pred.float() - target.float()) ** 2
+    #                             + args.huber_c**2
+    #                         )
+    #                         - args.huber_c
+    #                     )
+
+    #                 g_loss = args.adv_weight * discriminator(
+    #                     "g_loss",
+    #                     fake_adv.float(),
+    #                     adv_timesteps,
+    #                     prompt_embeds.float(),
+    #                     1.0,
+    #                 )
+    #                 loss += g_loss
+
+    #                 # 20.4.14. Backpropagate on the online student model (`unet`)
+    #                 accelerator.backward(loss)
+    #                 if accelerator.sync_gradients:
+    #                     accelerator.clip_grad_norm_(
+    #                         unet.parameters(), args.max_grad_norm
+    #                     )
+    #                 optimizer.step()
+    #                 lr_scheduler.step()
+    #                 optimizer.zero_grad(set_to_none=True)
+
+    #         # Checks if the accelerator has performed an optimization step behind the scenes
+    #         if accelerator.sync_gradients:
+    #             progress_bar.update(1)
+    #             global_step += 1
+
+    #             if accelerator.is_main_process:
+    #                 if global_step % args.checkpointing_steps == 0:
+    #                     # _before_ saving state, check if this save would set us over the `checkpoints_total_limit`
+    #                     if args.checkpoints_total_limit is not None:
+    #                         checkpoints = os.listdir(args.output_dir)
+    #                         checkpoints = [
+    #                             d for d in checkpoints if d.startswith("checkpoint")
+    #                         ]
+    #                         checkpoints = sorted(
+    #                             checkpoints, key=lambda x: int(x.split("-")[1])
+    #                         )
+
+    #                         # before we save the new checkpoint, we need to have at _most_ `checkpoints_total_limit - 1` checkpoints
+    #                         if len(checkpoints) >= args.checkpoints_total_limit:
+    #                             num_to_remove = (
+    #                                 len(checkpoints) - args.checkpoints_total_limit + 1
+    #                             )
+    #                             removing_checkpoints = checkpoints[0:num_to_remove]
+
+    #                             logger.info(
+    #                                 f"{len(checkpoints)} checkpoints already exist, removing {len(removing_checkpoints)} checkpoints"
+    #                             )
+    #                             logger.info(
+    #                                 f"removing checkpoints: {', '.join(removing_checkpoints)}"
+    #                             )
+
+    #                             for removing_checkpoint in removing_checkpoints:
+    #                                 removing_checkpoint = os.path.join(
+    #                                     args.output_dir, removing_checkpoint
+    #                                 )
+    #                                 shutil.rmtree(removing_checkpoint)
+
+    #                     save_path = os.path.join(
+    #                         args.output_dir, f"checkpoint-{global_step}"
+    #                     )
+    #                     accelerator.save_state(save_path)
+    #                     logger.info(f"Saved state to {save_path}")
+
+    #                 if global_step % args.validation_steps == 0:
+    #                     log_validation(
+    #                         vae,
+    #                         unet,
+    #                         args,
+    #                         accelerator,
+    #                         weight_dtype,
+    #                         global_step,
+    #                         cfg=1,
+    #                         num_inference_step=args.multiphase,
+    #                     )
+    #                     log_validation(
+    #                         vae,
+    #                         unet,
+    #                         args,
+    #                         accelerator,
+    #                         weight_dtype,
+    #                         global_step,
+    #                         cfg=7.5,
+    #                         num_inference_step=args.multiphase,
+    #                     )
+    #         if (global_step - 1) % 2 == 0:
+    #             logs = {
+    #                 "d_loss": loss.detach().item(),
+    #                 "lr": lr_scheduler.get_last_lr()[0],
+    #             }
+    #         else:
+    #             logs = {
+    #                 "loss_cm": loss.detach().item() - g_loss.detach().item(),
+    #                 "g_loss": g_loss.detach().item(),
+    #                 "lr": lr_scheduler.get_last_lr()[0],
+    #             }
+    #         progress_bar.set_postfix(**logs)
+    #         accelerator.log(logs, step=global_step)
+
+    #         if global_step >= args.max_train_steps:
+    #             break
+
+    # # Create the pipeline using using the trained modules and save it.
+    # accelerator.wait_for_everyone()
+    # if accelerator.is_main_process:
+    #     unet = accelerator.unwrap_model(unet)
+    #     unet.save_pretrained(args.output_dir)
+    #     lora_state_dict = get_peft_model_state_dict(unet, adapter_name="default")
+    #     StableDiffusionPipeline.save_lora_weights(
+    #         os.path.join(args.output_dir, "unet_lora"), lora_state_dict
+    #     )
+
+    # accelerator.end_training()
 
 
 if __name__ == "__main__":

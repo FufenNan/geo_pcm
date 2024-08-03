@@ -1,0 +1,22 @@
+2024-07-29 11:02:08,012 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Current SDK version is 0.16.4
+2024-07-29 11:02:08,012 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Configure stats pid to 3484037
+2024-07-29 11:02:08,012 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Loading settings from /home/haoyum3/.config/wandb/settings
+2024-07-29 11:02:08,012 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Loading settings from /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/settings
+2024-07-29 11:02:08,012 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-07-29 11:02:08,013 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-07-29 11:02:08,013 INFO    MainThread:3484037 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'code/text_to_image_sd15/train_pcm_lora_sd15_adv.py', 'program_abspath': '/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/train_pcm_lora_sd15_adv.py', 'program': '/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/train_pcm_lora_sd15_adv.py'}
+2024-07-29 11:02:08,014 INFO    MainThread:3484037 [wandb_init.py:_log_setup():526] Logging user logs to /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_110207-2j8me67l/logs/debug.log
+2024-07-29 11:02:08,014 INFO    MainThread:3484037 [wandb_init.py:_log_setup():527] Logging internal logs to /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_110207-2j8me67l/logs/debug-internal.log
+2024-07-29 11:02:08,014 INFO    MainThread:3484037 [wandb_init.py:init():566] calling init triggers
+2024-07-29 11:02:08,014 INFO    MainThread:3484037 [wandb_init.py:init():573] wandb.init called with sweep_config: {}
+config: {}
+2024-07-29 11:02:08,014 INFO    MainThread:3484037 [wandb_init.py:init():616] starting backend
+2024-07-29 11:02:08,014 INFO    MainThread:3484037 [wandb_init.py:init():620] setting up manager
+2024-07-29 11:02:08,016 INFO    MainThread:3484037 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-07-29 11:02:08,020 INFO    MainThread:3484037 [wandb_init.py:init():628] backend started and connected
+2024-07-29 11:02:08,026 INFO    MainThread:3484037 [wandb_init.py:init():720] updated telemetry
+2024-07-29 11:02:08,151 INFO    MainThread:3484037 [wandb_init.py:init():753] communicating run to backend with 90.0 second timeout
+2024-07-29 11:02:09,161 INFO    MainThread:3484037 [wandb_run.py:_on_init():2262] communicating current version
+2024-07-29 11:02:09,245 INFO    MainThread:3484037 [wandb_run.py:_on_init():2271] got version response upgrade_message: "wandb version 0.17.5 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-07-29 11:02:09,245 INFO    MainThread:3484037 [wandb_init.py:init():804] starting run threads in backend

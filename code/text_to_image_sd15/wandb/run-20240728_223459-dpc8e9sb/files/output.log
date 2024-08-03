@@ -1,0 +1,60 @@
+
+Checkpoint 'latest' does not exist. Starting a new training run.
+07/28/2024 22:35:10 - INFO - __main__ - ***** Running training *****
+07/28/2024 22:35:10 - INFO - __main__ -   Num batches each epoch = 188
+07/28/2024 22:35:10 - INFO - __main__ -   Num Epochs = 54
+07/28/2024 22:35:10 - INFO - __main__ -   Instantaneous batch size per device = 20
+07/28/2024 22:35:10 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 60
+07/28/2024 22:35:10 - INFO - __main__ -   Gradient Accumulation steps = 1
+07/28/2024 22:35:10 - INFO - __main__ -   Total optimization steps = 10000
+
+Steps:   0%|                                                                                           | 1/10000 [00:13<38:35:00, 13.89s/it, d_loss=2.05, lr=5e-6]Traceback (most recent call last):
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/train_pcm_lora_sd15_adv.py", line 1540, in <module>
+    main(args)
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/train_pcm_lora_sd15_adv.py", line 1425, in main
+    g_loss = args.adv_weight * discriminator(
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/parallel/distributed.py", line 1523, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/parallel/distributed.py", line 1359, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/accelerate/utils/operations.py", line 817, in forward
+    return model_forward(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/accelerate/utils/operations.py", line 805, in __call__
+    return convert_to_fp32(self.model_forward(*args, **kwargs))
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/amp/autocast_mode.py", line 16, in decorate_autocast
+    return func(*args, **kwargs)
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/discriminator_sd15.py", line 408, in forward
+    return self.g_loss(*args)
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/discriminator_sd15.py", line 429, in g_loss
+    fake_outputs = self._forward(sample_fake, timestep, encoder_hidden_states)
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/discriminator_sd15.py", line 401, in _forward
+    outputs.append(h(feature))
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/discriminator_sd15.py", line 365, in forward
+    x = self.conv1(x)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/normalization.py", line 287, in forward
+    return F.group_norm(
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/functional.py", line 2561, in group_norm
+    return torch.group_norm(input, num_groups, weight, bias, eps, torch.backends.cudnn.enabled)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 200.00 MiB. GPU 0 has a total capacity of 47.54 GiB of which 46.81 MiB is free. Process 2843789 has 2.38 GiB memory in use. Including non-PyTorch memory, this process has 45.10 GiB memory in use. Of the allocated memory 44.34 GiB is allocated by PyTorch, and 298.78 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

@@ -1,0 +1,36 @@
+07/29/2024 11:00:58 - INFO - __main__ - ***** Running training *****
+07/29/2024 11:00:58 - INFO - __main__ -   Num batches each epoch = 376
+07/29/2024 11:00:58 - INFO - __main__ -   Num Epochs = 27
+07/29/2024 11:00:58 - INFO - __main__ -   Instantaneous batch size per device = 10
+07/29/2024 11:00:58 - INFO - __main__ -   Total train batch size (w. parallel, distributed & accumulation) = 30
+07/29/2024 11:00:58 - INFO - __main__ -   Gradient Accumulation steps = 1
+07/29/2024 11:00:58 - INFO - __main__ -   Total optimization steps = 10000
+Steps:   0%|                                                                                  | 0/10000 [00:00<?, ?it/s]
+Steps:   0%|                                                                                  | 0/10000 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd2/train_pcm_lora_sd2_adv.py", line 1540, in <module>
+    main(args)
+  File "/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd2/train_pcm_lora_sd2_adv.py", line 1198, in main
+    vae.encode(pixel_values[i : i + 32]).latent_dist.sample()
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/diffusers/utils/accelerate_utils.py", line 46, in wrapper
+    return method(self, *args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/diffusers/models/autoencoders/autoencoder_kl.py", line 258, in encode
+    h = self.encoder(x)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/diffusers/models/autoencoders/vae.py", line 172, in forward
+    sample = down_block(sample)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/diffusers/models/unets/unet_2d_blocks.py", line 1377, in forward
+    hidden_states = resnet(hidden_states, temb=None, scale=scale)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1511, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1520, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/haoyum3/anaconda3/envs/pcm/lib/python3.9/site-packages/diffusers/models/resnet.py", line 403, in forward
+    output_tensor = (input_tensor + hidden_states) / self.output_scale_factor
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 640.00 MiB. GPU 0 has a total capacity of 47.54 GiB of which 534.81 MiB is free. Process 2617974 has 31.53 GiB memory in use. Including non-PyTorch memory, this process has 15.47 GiB memory in use. Of the allocated memory 14.66 GiB is allocated by PyTorch, and 376.06 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

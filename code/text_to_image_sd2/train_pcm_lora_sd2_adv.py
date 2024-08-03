@@ -24,7 +24,7 @@ import shutil
 from pathlib import Path
 from PIL import Image
 # os.environ["OPENCV_IO_ENABLE_OPENEXR"]="1"
-os.environ['CUDA_VISIBLE_DEVICES'] = '1,2,3'
+os.environ['CUDA_VISIBLE_DEVICES'] = '2,3,4'
 import accelerate
 import numpy as np
 import torch
@@ -54,7 +54,7 @@ from scheduling_ddpm_modified import DDPMScheduler
 from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version, is_wandb_available
 from diffusers.utils.import_utils import is_xformers_available
-from discriminator_sd15 import Discriminator
+from discriminator_sd2 import Discriminator
 
 
 MAX_SEQ_LENGTH = 77
@@ -794,12 +794,6 @@ def main(args):
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
-        # project_config={
-        #     'project_dir':args.output_dir, 
-        #     'logging_dir':logging_dir,
-        #     'num_processes': args.num_processes,
-        #     'gpu_ids': args.gpu_ids
-        # }
         project_config=accelerator_project_config,
     )
 
@@ -1117,12 +1111,15 @@ def main(args):
         tracker_config = dict(vars(args))
         accelerator.init_trackers(args.tracker_project_name, config=tracker_config)
 
+    #[bsz,77]
     uncond_input_ids = tokenizer(
         [""] * args.train_batch_size,
         return_tensors="pt",
         padding="max_length",
         max_length=77,
     ).input_ids.to(accelerator.device)
+
+    #[bsz,77,1024]
     uncond_prompt_embeds = text_encoder(uncond_input_ids)[0]
 
     # Train!
@@ -1197,6 +1194,7 @@ def main(args):
                     latents.append(
                         vae.encode(pixel_values[i : i + 32]).latent_dist.sample()
                     )
+                #[bsz,4,64,64]
                 latents = torch.cat(latents, dim=0)
 
                 latents = latents * vae.config.scaling_factor
@@ -1232,6 +1230,7 @@ def main(args):
                 c_skip_start, c_out_start = scalings_for_boundary_conditions_online(
                     index, inference_indices
                 )
+                #[bsz,1,1,1]
                 c_skip_start, c_out_start = [
                     append_dims(x, latents.ndim) for x in [c_skip_start, c_out_start]
                 ]
@@ -1264,6 +1263,7 @@ def main(args):
 
                 # 20.4.9. Get online LCM prediction on z_{t_{n + k}}, w, c, t_{n + k}
                 # print(encoded_text) # {}
+                #[bsz,4,64,64]
                 noise_pred = unet(
                     noisy_model_input,
                     start_timesteps,

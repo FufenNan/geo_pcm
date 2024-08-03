@@ -1,0 +1,201 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.9.18
+    cli_version: 0.16.4
+    framework: huggingface
+    huggingface_version: 4.38.2
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1722274775.0
+    t:
+      1:
+      - 1
+      - 11
+      - 41
+      - 49
+      - 55
+      - 71
+      - 83
+      - 98
+      - 105
+      2:
+      - 1
+      - 11
+      - 41
+      - 49
+      - 55
+      - 71
+      - 83
+      - 98
+      - 105
+      3:
+      - 23
+      4: 3.9.18
+      5: 0.16.4
+      6: 4.38.2
+      8:
+      - 2
+      - 5
+      13: linux-x86_64
+pretrained_teacher_model:
+  desc: null
+  value: /home/haoyum3/PCM/Phased-Consistency-Model/sd1.5
+pretrained_vae_model_name_or_path:
+  desc: null
+  value: null
+teacher_revision:
+  desc: null
+  value: null
+revision:
+  desc: null
+  value: null
+output_dir:
+  desc: null
+  value: outputs/lora_64_fuyun_PCM_2phases_adv
+cache_dir:
+  desc: null
+  value: null
+seed:
+  desc: null
+  value: 453645634
+logging_dir:
+  desc: null
+  value: logs
+report_to:
+  desc: null
+  value: wandb
+checkpointing_steps:
+  desc: null
+  value: 1000
+checkpoints_total_limit:
+  desc: null
+  value: 10
+resume_from_checkpoint:
+  desc: null
+  value: latest
+resolution:
+  desc: null
+  value: 512
+center_crop:
+  desc: null
+  value: false
+random_flip:
+  desc: null
+  value: false
+dataloader_num_workers:
+  desc: null
+  value: 16
+train_batch_size:
+  desc: null
+  value: 10
+num_train_epochs:
+  desc: null
+  value: 27
+max_train_steps:
+  desc: null
+  value: 10000
+max_train_samples:
+  desc: null
+  value: 4000000
+learning_rate:
+  desc: null
+  value: 5.0e-06
+scale_lr:
+  desc: null
+  value: false
+lr_scheduler:
+  desc: null
+  value: constant
+lr_warmup_steps:
+  desc: null
+  value: 500
+gradient_accumulation_steps:
+  desc: null
+  value: 1
+use_8bit_adam:
+  desc: null
+  value: true
+adam_beta1:
+  desc: null
+  value: 0.9
+adam_beta2:
+  desc: null
+  value: 0.999
+adam_weight_decay:
+  desc: null
+  value: 0.001
+adam_epsilon:
+  desc: null
+  value: 1.0e-08
+max_grad_norm:
+  desc: null
+  value: 1.0
+proportion_empty_prompts:
+  desc: null
+  value: 0
+w_min:
+  desc: null
+  value: 4.0
+w_max:
+  desc: null
+  value: 5.0
+num_ddim_timesteps:
+  desc: null
+  value: 50
+loss_type:
+  desc: null
+  value: huber
+huber_c:
+  desc: null
+  value: 0.001
+lora_rank:
+  desc: null
+  value: 64
+mixed_precision:
+  desc: null
+  value: fp16
+allow_tf32:
+  desc: null
+  value: false
+cast_teacher_unet:
+  desc: null
+  value: false
+enable_xformers_memory_efficient_attention:
+  desc: null
+  value: true
+gradient_checkpointing:
+  desc: null
+  value: true
+local_rank:
+  desc: null
+  value: 0
+validation_steps:
+  desc: null
+  value: 500
+push_to_hub:
+  desc: null
+  value: false
+hub_token:
+  desc: null
+  value: null
+hub_model_id:
+  desc: null
+  value: null
+tracker_project_name:
+  desc: null
+  value: lora_64_formal_fuyun_PCM_2phases_adv
+not_apply_cfg_solver:
+  desc: null
+  value: false
+multiphase:
+  desc: null
+  value: 2
+adv_weight:
+  desc: null
+  value: 0.1
+adv_lr:
+  desc: null
+  value: 1.0e-05

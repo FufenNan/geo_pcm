@@ -1,0 +1,444 @@
+{
+    "os": "Linux-5.15.0-91-generic-x86_64-with-glibc2.35",
+    "python": "3.9.18",
+    "heartbeatAt": "2024-07-31T23:40:46.438392",
+    "startedAt": "2024-07-31T23:40:45.491103",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--pretrained_teacher_model",
+        "/home/haoyum3/GeoWizard_edit/sdv2",
+        "--output_dir",
+        "outputs/lora_64_fuyun_PCM_2phases_adv",
+        "--tracker_project_nam",
+        "lora_64_formal_fuyun_PCM_2phases_adv",
+        "--mixed_precision",
+        "fp16",
+        "--resolution",
+        "512",
+        "--lora_rank",
+        "64",
+        "--learning_rate",
+        "5e-6",
+        "--loss_type",
+        "huber",
+        "--adam_weight_decay",
+        "1e-3",
+        "--max_train_steps",
+        "10000",
+        "--max_train_samples",
+        "4000000",
+        "--dataloader_num_workers",
+        "16",
+        "--w_min",
+        "4",
+        "--w_max",
+        "5",
+        "--validation_steps",
+        "500",
+        "--checkpointing_steps",
+        "1000",
+        "--checkpoints_total_limit",
+        "10",
+        "--train_batch_size",
+        "10",
+        "--enable_xformers_memory_efficient_attention",
+        "--gradient_accumulation_steps",
+        "1",
+        "--use_8bit_adam",
+        "--resume_from_checkpoint",
+        "latest",
+        "--seed",
+        "453645634",
+        "--report_to",
+        "wandb",
+        "--num_ddim_timesteps",
+        "50",
+        "--multiphase",
+        "2",
+        "--gradient_checkpointing",
+        "--adv_weight",
+        "0.1",
+        "--adv_lr",
+        "1e-5"
+    ],
+    "state": "running",
+    "program": "train_pcm_lora_sd2_adv.py",
+    "codePathLocal": "train_pcm_lora_sd2_adv.py",
+    "codePath": "code/text_to_image_sd2/train_pcm_lora_sd2_adv.py",
+    "git": {
+        "remote": "https://github.com/G-U-N/Phased-Consistency-Model.git",
+        "commit": "ac69dc75adadd140d12ad83050c930e2411f5499"
+    },
+    "email": "1341403878@qq.com",
+    "root": "/home/haoyum3/PCM/Phased-Consistency-Model",
+    "host": "simons-2.ics.uci.edu",
+    "username": "haoyum3",
+    "executable": "/home/haoyum3/anaconda3/envs/pcm/bin/python",
+    "cpu_count": 32,
+    "cpu_count_logical": 64,
+    "cpu_freq": {
+        "current": 2837.46053125,
+        "min": 1000.0,
+        "max": 3900.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1600.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2600.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2500.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1800.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1400.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2500.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2299.999,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1800.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3100.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2873.12,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2600.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3800.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2100.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2500.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2500.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2500.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 3900.0,
+            "min": 1000.0,
+            "max": 3900.0
+        },
+        {
+            "current": 2500.0,
+            "min": 1000.0,
+            "max": 3900.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 146.5873565673828,
+            "used": 23.080474853515625
+        }
+    },
+    "gpu": "NVIDIA L40",
+    "gpu_count": 6,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA L40",
+            "memory_total": 48305799168
+        },
+        {
+            "name": "NVIDIA RTX A6000",
+            "memory_total": 51527024640
+        },
+        {
+            "name": "NVIDIA RTX A6000",
+            "memory_total": 51527024640
+        },
+        {
+            "name": "NVIDIA RTX A6000",
+            "memory_total": 51527024640
+        },
+        {
+            "name": "NVIDIA RTX A6000",
+            "memory_total": 51527024640
+        },
+        {
+            "name": "NVIDIA L40",
+            "memory_total": 48305799168
+        }
+    ],
+    "memory": {
+        "total": 187.5445327758789
+    }
+}

@@ -1,0 +1,202 @@
+2024-07-29 10:39:35,852 INFO    StreamThr :3443663 [internal.py:wandb_internal():86] W&B internal server running at pid: 3443663, started at: 2024-07-29 10:39:35.850755
+2024-07-29 10:39:35,855 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: status
+2024-07-29 10:39:35,861 INFO    WriterThread:3443663 [datastore.py:open_for_write():87] open: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/run-1vteh9ai.wandb
+2024-07-29 10:39:35,863 DEBUG   SenderThread:3443663 [sender.py:send():378] send: header
+2024-07-29 10:39:35,967 DEBUG   SenderThread:3443663 [sender.py:send():378] send: run
+2024-07-29 10:39:36,279 INFO    SenderThread:3443663 [dir_watcher.py:__init__():211] watching files in: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files
+2024-07-29 10:39:36,279 INFO    SenderThread:3443663 [sender.py:_start_run_threads():1099] run started: 1vteh9ai with start time 1722274775.853914
+2024-07-29 10:39:36,307 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: check_version
+2024-07-29 10:39:36,307 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: check_version
+2024-07-29 10:39:36,432 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: run_start
+2024-07-29 10:39:36,500 DEBUG   HandlerThread:3443663 [system_info.py:__init__():26] System info init
+2024-07-29 10:39:36,500 DEBUG   HandlerThread:3443663 [system_info.py:__init__():41] System info init done
+2024-07-29 10:39:36,500 INFO    HandlerThread:3443663 [system_monitor.py:start():194] Starting system monitor
+2024-07-29 10:39:36,500 INFO    SystemMonitor:3443663 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-07-29 10:39:36,501 INFO    HandlerThread:3443663 [system_monitor.py:probe():214] Collecting system info
+2024-07-29 10:39:36,502 INFO    SystemMonitor:3443663 [interfaces.py:start():190] Started cpu monitoring
+2024-07-29 10:39:36,504 INFO    SystemMonitor:3443663 [interfaces.py:start():190] Started disk monitoring
+2024-07-29 10:39:36,506 INFO    SystemMonitor:3443663 [interfaces.py:start():190] Started gpu monitoring
+2024-07-29 10:39:36,507 INFO    SystemMonitor:3443663 [interfaces.py:start():190] Started memory monitoring
+2024-07-29 10:39:36,508 INFO    SystemMonitor:3443663 [interfaces.py:start():190] Started network monitoring
+2024-07-29 10:39:36,571 DEBUG   HandlerThread:3443663 [system_info.py:probe():150] Probing system
+2024-07-29 10:39:36,579 DEBUG   HandlerThread:3443663 [system_info.py:_probe_git():135] Probing git
+2024-07-29 10:39:36,612 DEBUG   HandlerThread:3443663 [system_info.py:_probe_git():143] Probing git done
+2024-07-29 10:39:36,613 DEBUG   HandlerThread:3443663 [system_info.py:probe():198] Probing system done
+2024-07-29 10:39:36,613 DEBUG   HandlerThread:3443663 [system_monitor.py:probe():223] {'os': 'Linux-5.15.0-91-generic-x86_64-with-glibc2.35', 'python': '3.9.18', 'heartbeatAt': '2024-07-29T17:39:36.571858', 'startedAt': '2024-07-29T17:39:35.823724', 'docker': None, 'cuda': None, 'args': ('--pretrained_teacher_model=/home/haoyum3/PCM/Phased-Consistency-Model/sd1.5', '--output_dir=outputs/lora_64_fuyun_PCM_2phases_adv', '--tracker_project_nam=lora_64_formal_fuyun_PCM_2phases_adv', '--mixed_precision=fp16', '--resolution=512', '--lora_rank=64', '--learning_rate=5e-6', '--loss_type=huber', '--adam_weight_decay=1e-3', '--max_train_steps=10000', '--max_train_samples=4000000', '--dataloader_num_workers=16', '--w_min=4', '--w_max=5', '--validation_steps=500', '--checkpointing_steps=1000', '--checkpoints_total_limit=10', '--train_batch_size=10', '--enable_xformers_memory_efficient_attention', '--gradient_accumulation_steps=1', '--use_8bit_adam', '--resume_from_checkpoint=latest', '--seed=453645634', '--report_to=wandb', '--num_ddim_timesteps=50', '--multiphase=2', '--gradient_checkpointing', '--adv_weight=0.1', '--adv_lr=1e-5'), 'state': 'running', 'program': '/home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/train_pcm_lora_sd15_adv.py', 'codePathLocal': 'train_pcm_lora_sd15_adv.py', 'codePath': 'code/text_to_image_sd15/train_pcm_lora_sd15_adv.py', 'git': {'remote': 'https://github.com/G-U-N/Phased-Consistency-Model.git', 'commit': 'ac69dc75adadd140d12ad83050c930e2411f5499'}, 'email': '1341403878@qq.com', 'root': '/home/haoyum3/PCM/Phased-Consistency-Model', 'host': 'simons-2.ics.uci.edu', 'username': 'haoyum3', 'executable': '/home/haoyum3/anaconda3/envs/pcm/bin/python', 'cpu_count': 32, 'cpu_count_logical': 64, 'cpu_freq': {'current': 2449.8961718750006, 'min': 1000.0, 'max': 3900.0}, 'cpu_freq_per_core': [{'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2600.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2500.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 1500.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1400.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 3900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 3900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 3900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2600.0, 'min': 1000.0, 'max': 3900.0}, {'current': 3700.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2400.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 3900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 3200.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2900.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2600.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2800.0, 'min': 1000.0, 'max': 3900.0}, {'current': 2799.999, 'min': 1000.0, 'max': 3900.0}], 'disk': {'/': {'total': 146.5873565673828, 'used': 23.080474853515625}}, 'gpu': 'NVIDIA L40', 'gpu_count': 6, 'gpu_devices': [{'name': 'NVIDIA L40', 'memory_total': 48305799168}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA RTX A6000', 'memory_total': 51527024640}, {'name': 'NVIDIA L40', 'memory_total': 48305799168}], 'memory': {'total': 187.5445327758789}}
+2024-07-29 10:39:36,613 INFO    HandlerThread:3443663 [system_monitor.py:probe():224] Finished collecting system info
+2024-07-29 10:39:36,613 INFO    HandlerThread:3443663 [system_monitor.py:probe():227] Publishing system info
+2024-07-29 10:39:36,613 DEBUG   HandlerThread:3443663 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-07-29 10:39:37,283 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_created():271] file/dir created: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/conda-environment.yaml
+2024-07-29 10:39:43,502 DEBUG   HandlerThread:3443663 [system_info.py:_save_conda():219] Saving conda packages done
+2024-07-29 10:39:43,507 INFO    HandlerThread:3443663 [system_monitor.py:probe():229] Finished publishing system info
+2024-07-29 10:39:43,538 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: status_report
+2024-07-29 10:39:43,538 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: keepalive
+2024-07-29 10:39:43,539 DEBUG   SenderThread:3443663 [sender.py:send():378] send: files
+2024-07-29 10:39:43,540 INFO    SenderThread:3443663 [sender.py:_save_file():1365] saving file wandb-metadata.json with policy now
+2024-07-29 10:39:43,916 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: python_packages
+2024-07-29 10:39:43,916 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: python_packages
+2024-07-29 10:39:43,917 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: stop_status
+2024-07-29 10:39:43,918 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: internal_messages
+2024-07-29 10:39:43,920 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: stop_status
+2024-07-29 10:39:43,980 INFO    wandb-upload_0:3443663 [upload_job.py:push():131] Uploaded file /tmp/tmpy6_8e2c7wandb/m9cgbgxb-wandb-metadata.json
+2024-07-29 10:39:44,058 DEBUG   SenderThread:3443663 [sender.py:send():378] send: telemetry
+2024-07-29 10:39:44,058 DEBUG   SenderThread:3443663 [sender.py:send():378] send: config
+2024-07-29 10:39:44,289 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/conda-environment.yaml
+2024-07-29 10:39:44,290 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_created():271] file/dir created: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/requirements.txt
+2024-07-29 10:39:44,291 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_created():271] file/dir created: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/wandb-metadata.json
+2024-07-29 10:39:45,292 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_created():271] file/dir created: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/output.log
+2024-07-29 10:39:46,855 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: status_report
+2024-07-29 10:39:47,294 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/output.log
+2024-07-29 10:39:48,608 DEBUG   SenderThread:3443663 [sender.py:send():378] send: exit
+2024-07-29 10:39:48,608 INFO    SenderThread:3443663 [sender.py:send_exit():585] handling exit code: 1
+2024-07-29 10:39:48,609 INFO    SenderThread:3443663 [sender.py:send_exit():587] handling runtime: 12
+2024-07-29 10:39:48,611 INFO    SenderThread:3443663 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-07-29 10:39:48,612 INFO    SenderThread:3443663 [sender.py:send_exit():593] send defer
+2024-07-29 10:39:48,613 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:48,613 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 0
+2024-07-29 10:39:48,613 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:48,614 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 0
+2024-07-29 10:39:48,614 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 1
+2024-07-29 10:39:48,614 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:48,614 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 1
+2024-07-29 10:39:48,614 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:48,615 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 1
+2024-07-29 10:39:48,615 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 2
+2024-07-29 10:39:48,615 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:48,615 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 2
+2024-07-29 10:39:48,615 INFO    HandlerThread:3443663 [system_monitor.py:finish():203] Stopping system monitor
+2024-07-29 10:39:48,616 DEBUG   SystemMonitor:3443663 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-07-29 10:39:48,616 INFO    HandlerThread:3443663 [interfaces.py:finish():202] Joined cpu monitor
+2024-07-29 10:39:48,616 DEBUG   SystemMonitor:3443663 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-07-29 10:39:48,617 INFO    HandlerThread:3443663 [interfaces.py:finish():202] Joined disk monitor
+2024-07-29 10:39:48,617 DEBUG   SystemMonitor:3443663 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-07-29 10:39:49,299 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_created():271] file/dir created: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/wandb-summary.json
+2024-07-29 10:39:50,535 INFO    HandlerThread:3443663 [interfaces.py:finish():202] Joined gpu monitor
+2024-07-29 10:39:50,536 INFO    HandlerThread:3443663 [interfaces.py:finish():202] Joined memory monitor
+2024-07-29 10:39:50,537 INFO    HandlerThread:3443663 [interfaces.py:finish():202] Joined network monitor
+2024-07-29 10:39:50,538 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:50,539 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:50,540 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 2
+2024-07-29 10:39:50,540 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 3
+2024-07-29 10:39:50,541 DEBUG   SenderThread:3443663 [sender.py:send():378] send: stats
+2024-07-29 10:39:50,541 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:50,542 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:50,545 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 3
+2024-07-29 10:39:50,547 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:50,547 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 3
+2024-07-29 10:39:50,548 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 4
+2024-07-29 10:39:50,548 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:50,548 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 4
+2024-07-29 10:39:50,548 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:50,549 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 4
+2024-07-29 10:39:50,550 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 5
+2024-07-29 10:39:50,550 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:50,550 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 5
+2024-07-29 10:39:50,550 DEBUG   SenderThread:3443663 [sender.py:send():378] send: summary
+2024-07-29 10:39:50,554 INFO    SenderThread:3443663 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-07-29 10:39:50,555 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:50,555 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 5
+2024-07-29 10:39:50,555 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 6
+2024-07-29 10:39:50,555 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:50,556 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 6
+2024-07-29 10:39:50,556 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:50,557 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 6
+2024-07-29 10:39:50,561 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: status_report
+2024-07-29 10:39:50,609 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:50,678 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 7
+2024-07-29 10:39:50,678 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:50,679 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:50,680 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 7
+2024-07-29 10:39:50,681 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:50,682 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 7
+2024-07-29 10:39:51,302 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/wandb-summary.json
+2024-07-29 10:39:51,303 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/config.yaml
+2024-07-29 10:39:51,303 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/output.log
+2024-07-29 10:39:51,610 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:52,865 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 8
+2024-07-29 10:39:52,865 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:52,865 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:52,867 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 8
+2024-07-29 10:39:52,867 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:52,867 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 8
+2024-07-29 10:39:52,868 INFO    SenderThread:3443663 [job_builder.py:build():298] Attempting to build job artifact
+2024-07-29 10:39:52,871 INFO    SenderThread:3443663 [job_builder.py:_get_source_type():428] is repo sourced job
+2024-07-29 10:39:52,919 INFO    SenderThread:3443663 [job_builder.py:build():404] adding wandb-job metadata file
+2024-07-29 10:39:52,940 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 9
+2024-07-29 10:39:52,941 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:52,941 DEBUG   SenderThread:3443663 [sender.py:send():378] send: artifact
+2024-07-29 10:39:52,942 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 9
+2024-07-29 10:39:53,305 INFO    Thread-12 :3443663 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/output.log
+2024-07-29 10:39:53,611 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:54,428 INFO    wandb-upload_1:3443663 [upload_job.py:push():86] Skipped uploading /home/haoyum3/.local/share/wandb/artifacts/staging/tmp2rez0rw0
+2024-07-29 10:39:54,614 INFO    wandb-upload_0:3443663 [upload_job.py:push():89] Uploaded file /home/haoyum3/.local/share/wandb/artifacts/staging/tmp_8v6s5ky
+2024-07-29 10:39:55,445 INFO    SenderThread:3443663 [sender.py:send_artifact():1443] sent artifact job-https___github.com_G-U-N_Phased-Consistency-Model.git_code_text_to_image_sd15_train_pcm_lora_sd15_adv.py - {'id': 'QXJ0aWZhY3Q6MTA2MDM3NzU4MA==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjMzODY1NjY2Ng==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6MTA1NzA2NTc3Nw==', 'versionIndex': 0}}}
+2024-07-29 10:39:55,445 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:55,445 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 9
+2024-07-29 10:39:55,445 INFO    SenderThread:3443663 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-07-29 10:39:56,308 INFO    SenderThread:3443663 [dir_watcher.py:finish():388] scan: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files
+2024-07-29 10:39:56,309 INFO    SenderThread:3443663 [dir_watcher.py:finish():402] scan save: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/config.yaml config.yaml
+2024-07-29 10:39:56,310 INFO    SenderThread:3443663 [dir_watcher.py:finish():402] scan save: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/conda-environment.yaml conda-environment.yaml
+2024-07-29 10:39:56,310 INFO    SenderThread:3443663 [dir_watcher.py:finish():402] scan save: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/wandb-metadata.json wandb-metadata.json
+2024-07-29 10:39:56,313 INFO    SenderThread:3443663 [dir_watcher.py:finish():402] scan save: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/requirements.txt requirements.txt
+2024-07-29 10:39:56,316 INFO    SenderThread:3443663 [dir_watcher.py:finish():402] scan save: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/output.log output.log
+2024-07-29 10:39:56,316 INFO    SenderThread:3443663 [dir_watcher.py:finish():402] scan save: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/wandb-summary.json wandb-summary.json
+2024-07-29 10:39:56,320 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 10
+2024-07-29 10:39:56,323 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:56,326 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:56,327 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 10
+2024-07-29 10:39:56,328 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:56,328 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 10
+2024-07-29 10:39:56,328 INFO    SenderThread:3443663 [file_pusher.py:finish():172] shutting down file pusher
+2024-07-29 10:39:56,599 INFO    wandb-upload_0:3443663 [upload_job.py:push():131] Uploaded file /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/conda-environment.yaml
+2024-07-29 10:39:56,615 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:56,616 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:56,799 INFO    wandb-upload_1:3443663 [upload_job.py:push():131] Uploaded file /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/config.yaml
+2024-07-29 10:39:56,861 INFO    wandb-upload_3:3443663 [upload_job.py:push():131] Uploaded file /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/output.log
+2024-07-29 10:39:56,885 INFO    wandb-upload_2:3443663 [upload_job.py:push():131] Uploaded file /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/requirements.txt
+2024-07-29 10:39:56,916 INFO    wandb-upload_4:3443663 [upload_job.py:push():131] Uploaded file /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/files/wandb-summary.json
+2024-07-29 10:39:57,116 INFO    Thread-11 :3443663 [sender.py:transition_state():613] send defer: 11
+2024-07-29 10:39:57,117 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:57,118 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 11
+2024-07-29 10:39:57,119 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:57,119 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 11
+2024-07-29 10:39:57,119 INFO    SenderThread:3443663 [file_pusher.py:join():178] waiting for file pusher
+2024-07-29 10:39:57,121 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 12
+2024-07-29 10:39:57,121 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:57,121 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 12
+2024-07-29 10:39:57,123 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:57,123 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 12
+2024-07-29 10:39:57,123 INFO    SenderThread:3443663 [file_stream.py:finish():595] file stream finish called
+2024-07-29 10:39:57,237 INFO    SenderThread:3443663 [file_stream.py:finish():599] file stream finish is done
+2024-07-29 10:39:57,237 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 13
+2024-07-29 10:39:57,237 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:57,239 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 13
+2024-07-29 10:39:57,239 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:57,239 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 13
+2024-07-29 10:39:57,239 INFO    SenderThread:3443663 [sender.py:transition_state():613] send defer: 14
+2024-07-29 10:39:57,240 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: defer
+2024-07-29 10:39:57,240 DEBUG   SenderThread:3443663 [sender.py:send():378] send: final
+2024-07-29 10:39:57,241 INFO    HandlerThread:3443663 [handler.py:handle_request_defer():172] handle defer: 14
+2024-07-29 10:39:57,241 DEBUG   SenderThread:3443663 [sender.py:send():378] send: footer
+2024-07-29 10:39:57,241 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: defer
+2024-07-29 10:39:57,241 INFO    SenderThread:3443663 [sender.py:send_request_defer():609] handle sender defer: 14
+2024-07-29 10:39:57,242 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:57,243 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: poll_exit
+2024-07-29 10:39:57,243 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: server_info
+2024-07-29 10:39:57,243 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: get_summary
+2024-07-29 10:39:57,243 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: sampled_history
+2024-07-29 10:39:57,243 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: internal_messages
+2024-07-29 10:39:57,244 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:57,245 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: poll_exit
+2024-07-29 10:39:57,245 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: server_info
+2024-07-29 10:39:57,250 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: job_info
+2024-07-29 10:39:57,315 DEBUG   SenderThread:3443663 [sender.py:send_request():405] send_request: job_info
+2024-07-29 10:39:57,315 INFO    MainThread:3443663 [wandb_run.py:_footer_history_summary_info():3851] rendering history
+2024-07-29 10:39:57,317 INFO    MainThread:3443663 [wandb_run.py:_footer_history_summary_info():3883] rendering summary
+2024-07-29 10:39:57,317 INFO    MainThread:3443663 [wandb_run.py:_footer_sync_info():3810] logging synced files
+2024-07-29 10:39:57,317 DEBUG   HandlerThread:3443663 [handler.py:handle_request():146] handle_request: shutdown
+2024-07-29 10:39:57,318 INFO    HandlerThread:3443663 [handler.py:finish():869] shutting down handler
+2024-07-29 10:39:58,251 INFO    WriterThread:3443663 [datastore.py:close():296] close: /home/haoyum3/PCM/Phased-Consistency-Model/code/text_to_image_sd15/wandb/run-20240729_103935-1vteh9ai/run-1vteh9ai.wandb
+2024-07-29 10:39:58,315 INFO    SenderThread:3443663 [sender.py:finish():1521] shutting down sender
+2024-07-29 10:39:58,315 INFO    SenderThread:3443663 [file_pusher.py:finish():172] shutting down file pusher
+2024-07-29 10:39:58,315 INFO    SenderThread:3443663 [file_pusher.py:join():178] waiting for file pusher
